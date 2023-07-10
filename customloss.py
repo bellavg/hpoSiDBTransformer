@@ -7,22 +7,24 @@ from sklearn.metrics import classification_report
 import pandas as pd
 
 # add muliplication by nj charge to the potential matrix
+
 def get_potential(x, b, gridsize):
-    epbs_matrix = torch.load("/home/igardner/SiDBTransformer/electric_potential_matrix.pth") #size 42, 42, 1764
-    x = x.squeeze(-1)
+    epbs_matrix = torch.load("/home/igardner/hpoSiDBTransformer/electric_potential_matrix.pth") #size 42, 42, 1764
+    #epbs_matrix = torch.load("./electric_potential_matrix.pth")
+    #x shape b, 16, 16
+   # x = x.squeeze(-1)
 
     epbs_out = torch.zeros(b, gridsize, gridsize, MAXDBS)
     for batch_index, batch in enumerate(x):
         batchnz = torch.nonzero(batch)
         for i, currenti in enumerate(batchnz):
             for j, comp_cord in enumerate(batchnz[i:]):
-                loc = comp_cord[0] * 42 + comp_cord[1]
+                loc = comp_cord[0] * gridsize + comp_cord[1]
                 epbs_out[batch_index][currenti[0]][currenti[1]][j] = epbs_matrix[currenti[0]][currenti[1]][loc]
-                loc2 = currenti[0] * 42 + currenti[1]
+                loc2 = currenti[0] * gridsize + currenti[1]
                 epbs_out[batch_index][comp_cord[0]][comp_cord[1]][i] = epbs_matrix[comp_cord[0]][comp_cord[1]][loc2]
 
     epbs_out = torch.sum(epbs_out, dim=-1)
-    epbs_out = torch.nn.functional.normalize(epbs_out, p=2.0, dim=-1)
     return epbs_out
 
 
