@@ -16,8 +16,8 @@ class STDataset(Dataset):
         return self.input[idx], self.target[idx]
 
 
-inputs = torch.load('/home/igardner/hpoSiDBTransformer/denseinputs.pth')
-labels = torch.load('/home/igardner/hpoSiDBTransformer/denselabels.pth')
+inputs = torch.load('/home/igardner/hpoSiDBTransformer/2235inputs.pth')
+labels = torch.load('/home/igardner/hpoSiDBTransformer/2235labels.pth')
 
 train_inputs, tv_inputs, train_labels, tv_labels = train_test_split(inputs, labels, test_size=0.4, random_state=42)
 train_dataset = STDataset(train_inputs, train_labels)
