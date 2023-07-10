@@ -37,7 +37,7 @@ def define_model_config(trial):
 
 
 def objective(trial: optuna.trial.Trial):
-    logger = CSVLogger(version="trial"+str(trial.number), save_dir="./hpologsnew", name="hpotrials")
+    logger = CSVLogger(version="trial"+str(trial.number), save_dir="/home/igardner/hpologsnew", name="hpotrials")
     model_config = define_model_config(trial)
     model = LitModel(model_config)
     trainer = pl.Trainer(max_epochs=10, logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters")
     study.optimize(objective, n_trials=200, timeout=21600, gc_after_trial=True)
     trials_df = study.trials_dataframe()
-    trials_df.to_csv("./hpologsnew/hpotrials.csv")
+    trials_df.to_csv("/home/igardner/hpologsnew/hpotrials.csv")
     print(study.best_trial)
     best_params = study.best_params
     # Assuming study is your Optuna study object
