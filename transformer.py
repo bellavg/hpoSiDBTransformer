@@ -68,6 +68,7 @@ class SiDBTransformer(nn.Module):
 
 
         x = self.embed(x)
+        e = x.shape[-1]
 
         nzmask = nzmask.unsqueeze(-1).repeat(1, x.shape[-1])
 
@@ -94,11 +95,12 @@ class SiDBTransformer(nn.Module):
             x = blk(x, nzmask, b, gs)
 
         #print(x)
-        x = self.to_probs(x)
 
-        x,_,_ = x.dense(shape=torch.Size([b,  2, gs, gs])) #2 is number of classes
+
+        x,_,_ = x.dense(shape=torch.Size([b,  x.shape[-1], gs, gs])) #2 is number of classes
 
         #X = self.norm(x)
+        x = self.to_linprobs(x.permute(0, 2, 3, 1).contiguous().view(-1, e))
 
 
         #print(x)
