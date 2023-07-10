@@ -61,8 +61,10 @@ class SparseAttention(nn.Module):
                                 coordinate_manager=ex.coordinate_manager)
           q, k, v = q_mapping(seq), k_mapping(seq), v_mapping(seq)
           qk = q * k
+          qk = ME.MinkowskiSumPooling(kernel_size=seq.shape[0], stride=1)(qk)
           qk = self.softmax(qk/div_t.to(qk.device))
           qk = qk * v
+          qk = ME.MinkowskiSumPooling(kernel_size=seq.shape[0], stride=1)(qk)
           result.append(qk)
 
 

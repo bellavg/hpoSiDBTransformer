@@ -15,11 +15,9 @@ def get_accuracy(outputs, targets):
     masked_output = outputs[mask.unsqueeze(-1).repeat(1, 2)].view(-1, 2)
     pred = masked_output.argmax(dim=1, keepdim=True)
     has_zero_class = (pred == 0).any()
-    if has_zero_class.item() is False:
-        print("no zero class")
+    assert has_zero_class.item() is True, "no zero class"
     has_one_class = (pred == 1).any()
-    if has_one_class.item() is False:
-        print("no one class")
+    assert has_one_class.item() is True, "no zero class"
     accuracy = torch.mean((pred == masked_target).float())
     return accuracy, pred, masked_target
 
@@ -34,7 +32,7 @@ class LitModel(pl.LightningModule):
         self.opname = "Adam"
         self.lr = config["lr"]
         self.wd = config["weight_decay"]
-        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1, weights=torch.tensor([1.0, 2.0]).cuda())
+        self.lossfn = nn.NLLLoss(ignore_index=-1)
 
     def forward(self, x):
         return self.transformer(x)
@@ -43,7 +41,7 @@ class LitModel(pl.LightningModule):
         x, targets = batch
         targets = targets.to(x.device)
         outputs = self(x)
-        loss = self.lossfn(outputs.permute(0,2,3,1).reshape(-1,2).cuda(), targets.reshape(-1).cuda())  # check sizes should be b, 2, 42, 42 and b, 42, 42
+        loss = self.lossfn(outputs, targets)  # check sizes should be b, 2, 42, 42 and b, 42, 42
         self.log("train_loss", loss, logger=True, on_epoch=True, on_step=False, sync_dist=True)
         return loss
 
@@ -55,6 +53,7 @@ class LitModel(pl.LightningModule):
         accuracy, _, _ = get_accuracy(outputs, targets)
         self.log("val_acc", accuracy, sync_dist=True, logger=True, on_epoch=True, on_step=False)
         self.log("hp_metric", accuracy, on_step=False, on_epoch=True, sync_dist=True)
+        torch.cuda.empty_cache()
 
     def configure_optimizers(self):
         optimizer = getattr(

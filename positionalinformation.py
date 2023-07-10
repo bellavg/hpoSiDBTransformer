@@ -19,7 +19,6 @@ class BaseAbsPE(nn.Module):
         y_embedded_coords = y_embedded_coords.repeat(grid_size, 1, 1)
         x_embedded_coords = y_embedded_coords.transpose(0, 1).cuda()
         embedded_coords = x_embedded_coords + y_embedded_coords
-        embedded_coords = torch.nn.functional.normalize(embedded_coords, dim=-1)
         embedded_coords = embedded_coords.reshape(grid_size, grid_size, e_dim)
 
         return embedded_coords.repeat(b, 1, 1, 1).cuda()
@@ -104,3 +103,23 @@ def get_physical(x, mindim, gridsize=42):
         return torch.nn.functional.normalize(dmn, p=2.0, dim=-1)
     else:
         return rdm
+
+
+class AbsolutePositionalEncoding(nn.Module):
+    def __init__(self, d_model, grid_size):
+        super().__init__()
+        self.d_model = d_model
+        self.grid_size = grid_size
+        self.embedding = nn.Parameter(self.generate_positional_encoding(), requires_grad=False)
+
+    def generate_positional_encoding(self):
+        position = torch.arange(0, self.grid_size).unsqueeze(1).float()
+        div_term = torch.exp(torch.arange(0, self.d_model, 2).float() * -(math.log(10000.0) / self.d_model))
+        pos_enc = torch.zeros((self.grid_size, self.grid_size, self.d_model))
+        pos_enc[:, :, 0::2] = torch.sin(position * div_term)
+        pos_enc[:, :, 1::2] = torch.cos(position * div_term)
+        return pos_enc.unsqueeze(0)  # Adding extra dimension for batch size
+
+    def forward(self):
+        # Assuming x is of shape (batch_size, grid_size, grid_size, d_model)
+        return self.embedding

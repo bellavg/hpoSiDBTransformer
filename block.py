@@ -23,7 +23,7 @@ class Block(nn.Module):
 
         self.attn = SparseAttention(heads=h, ed=ed)
 
-        self.norm1 = me.MinkowskiInstanceNorm(ed)
+        self.norm1 = me.MinkowskiBatchNorm(ed)
 
         self.mlp = nn.Sequential(
             me.MinkowskiLinear(ed, ed*4),
@@ -39,8 +39,6 @@ class Block(nn.Module):
 
 
     def forward(self, x, mask, b, gs):
-        torch.cuda.empty_cache()
-        gc.collect()
 
         x += me.SparseTensor(features=self.attn(self.norm1(x), b, gs, mask),
                              coordinate_manager=x.coordinate_manager,
