@@ -64,8 +64,7 @@ class SparseAttention(nn.Module):
           result.append(attention @ v)
 
 
-        result = torch.cat(result).reshape(h, b, gs, gs, s).permute(1, 2, 3, 0,4).reshape(b, gs, gs, e)  
-        print(result.shape)
+        result = torch.cat(result).reshape(h, b, gs, gs, s).permute(1, 2, 3, 0,4).reshape(b, gs, gs, e)
         result = self.unifyheads(result)
         result = result.reshape(-1,e)
         result = result[mask]

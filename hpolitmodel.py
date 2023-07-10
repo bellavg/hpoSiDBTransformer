@@ -8,7 +8,7 @@ import torch.nn as nn
 
 
 def get_accuracy(outputs, targets):
-    print(outputs)
+    print(outputs, "o")
     targets = targets.reshape(-1)
     mask = targets >= 0
     outputs = outputs.permute(0, 2, 3, 1).reshape((-1, 2))
