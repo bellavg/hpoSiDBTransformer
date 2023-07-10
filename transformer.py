@@ -54,7 +54,7 @@ class SiDBTransformer(nn.Module):
             del dis_pos
         elif self.pe_type == "potential":
             elpot = get_potential(x.clone().detach(), b, gs)
-            x += elpot
+            x = x +  elpot
             x = self.drop(x)
             del elpot
 
@@ -82,18 +82,18 @@ class SiDBTransformer(nn.Module):
             del pos
 
         if self.pe_type == "base":
-            pos = self.get_pos()  # returns cardinal coordinates embedded
+            pos = self.get_pos(b)  # returns cardinal coordinates embedded
             pos = pos.reshape(-1, x.shape[-1]).to(x.device)
             pos = pos[nzmask].view(x.shape)
             pos = ME.SparseTensor(features=pos.to(x.device), coordinates=x.coordinates,
                                   coordinate_manager=x.coordinate_manager, quantization_mode=quantization_mode)
             x = x + pos
             x = self.medrop(x)
-            del pos
 
         for blk in self.tblocks:
             x = blk(x, nzmask, b, gs)
 
+        #print(x)
         x = self.to_probs(x)
 
         x,_,_ = x.dense(shape=torch.Size([b,  2, gs, gs])) #2 is number of classes
@@ -101,7 +101,7 @@ class SiDBTransformer(nn.Module):
         #X = self.norm(x)
 
 
-        #x = self.to_linprobs(x) #check #check size
+        #print(x)
 
         x = self.softmax(x) #check size
 

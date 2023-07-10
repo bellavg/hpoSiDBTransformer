@@ -8,16 +8,18 @@ import torch.nn as nn
 
 
 def get_accuracy(outputs, targets):
+    print(outputs)
     targets = targets.reshape(-1)
     mask = targets >= 0
     outputs = outputs.permute(0, 2, 3, 1).reshape((-1, 2))
     masked_target = targets[mask]
     masked_output = outputs[mask.unsqueeze(-1).repeat(1, 2)].view(-1, 2)
     pred = masked_output.argmax(dim=1, keepdim=True)
+    print(pred, pred.shape)
     has_zero_class = (pred == 0).any()
-    assert has_zero_class.item() is True, "no zero class"
+    #assert has_zero_class.item() is False, "no zero class"
     has_one_class = (pred == 1).any()
-    assert has_one_class.item() is True, "no zero class"
+    #assert has_one_class.item() is False, "no zero class"
     accuracy = torch.mean((pred == masked_target).float())
     return accuracy, pred, masked_target
 

@@ -40,7 +40,7 @@ class Block(nn.Module):
 
     def forward(self, x, mask, b, gs):
 
-        x += me.SparseTensor(features=self.attn(self.norm1(x), b, gs, mask),
+        x = x + me.SparseTensor(features=self.attn(self.norm1(x), b, gs, mask),
                              coordinate_manager=x.coordinate_manager,
                              coordinate_map_key=x.coordinate_map_key)
 
