@@ -37,7 +37,7 @@ def define_model_config(trial):
 
 
 def objective(trial: optuna.trial.Trial):
-    logger = CSVLogger(version="trial"+str(trial.number), save_dir="/home/igardner/hpologsnew2", name="hpotrials")
+    logger = CSVLogger(version="trial"+str(trial.number), save_dir="/home/igardner/hpologsnew3", name="hpotrials")
     model_config = define_model_config(trial)
     model = LitModel(model_config)
     trainer = pl.Trainer(max_epochs=10,strategy='ddp_find_unused_parameters_true',  logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
@@ -48,14 +48,14 @@ def objective(trial: optuna.trial.Trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters", sampler=optuna.samplers.RandomSampler())
+    study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters", sampler=optuna.samplers.GridSampler())
     study.optimize(objective, n_trials=200, timeout=14400, gc_after_trial=True)
     trials_df = study.trials_dataframe()
-    trials_df.to_csv("/home/igardner/hpologsnew2/hpotrials.csv")
+    trials_df.to_csv("/home/igardner/hpologsnew3/hpotrials.csv")
     print(study.best_trial)
     best_params = study.best_params
     # Assuming study is your Optuna study object
     fig = optuna.visualization.plot_parallel_coordinate(study, target_name = "val_acc")
     # Save the figure
     # pip install -U kaleido
-    fig.write_image("/home/igardner/hpologsnew2/optimization_plot.png")
+    fig.write_image("/home/igardner/hpologsnew3/optimization_plot.png")

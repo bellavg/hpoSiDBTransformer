@@ -7,7 +7,6 @@ import gc
 import torch.nn as nn
 
 
-
 def get_accuracy(outputs, targets):
     targets = targets.reshape(-1)
     mask = targets >= 0
@@ -18,6 +17,9 @@ def get_accuracy(outputs, targets):
     has_zero_class = (pred == 0).any()
     if has_zero_class.item() is False:
         print("no zero class")
+    has_one_class = (pred == 1).any()
+    if has_one_class.item() is False:
+        print("no one class")
     accuracy = torch.mean((pred == masked_target).float())
     return accuracy, pred, masked_target
 
@@ -32,7 +34,7 @@ class LitModel(pl.LightningModule):
         self.opname = "Adam"
         self.lr = config["lr"]
         self.wd = config["weight_decay"]
-        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1, weights=torch.tensor([2.0, 1.0]).cuda())
+        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1, weights=torch.tensor([1.0, 2.0]).cuda())
 
     def forward(self, x):
         return self.transformer(x)
