@@ -18,9 +18,9 @@ class SiDBTransformer(nn.Module):
         self.tblocks = nn.ModuleList(
             [Block(h=heads, pe=position_info, ed=embeddim, d_rate=d_rate) for _ in range(depth)])
 
-        self.to_probs = ME.MinkowskiLinear(embeddim, num_classes)
+        #self.to_probs = ME.MinkowskiLinear(embeddim, num_classes)
 
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.LogSoftmax(dim=-1)
         self.sig = nn.Sigmoid()
 
         self.medrop = ME.MinkowskiDropout(d_rate)
@@ -29,7 +29,7 @@ class SiDBTransformer(nn.Module):
 
         self.drop = nn.Dropout(d_rate)
 
-        self.to_linprobs = nn.Linear(embeddim, num_classes)
+        self.to_probs = nn.Linear(embeddim, num_classes)
 
         self.embedconv = ME.MinkowskiConvolution(in_channels=input_dim, out_channels=embeddim, bias=True, kernel_size=3, dimension=2)
 
@@ -94,9 +94,13 @@ class SiDBTransformer(nn.Module):
         for blk in self.tblocks:
             x = blk(x, nzmask, b, gs)
 
-        x = self.to_probs(x)
 
-        x,_,_ = x.dense(shape=torch.Size([b,  2, gs, gs])) #2 is number of classes
+
+        x,_,_ = x.dense(shape=torch.Size([b,  x.shape[-1], gs, gs])) #2 is number of classes
+
+
+        x = self.to_probs(x.permute(0, 2, 3, 1).contiguous().view(-1, x.shape[-1])) #check size
+        print(x)
 
         #X = self.norm(x)
 
@@ -104,6 +108,7 @@ class SiDBTransformer(nn.Module):
         #x = self.to_linprobs(x) #check #check size
 
         x = self.softmax(x) #check size
+        print(x)
 
 
         return x #check size

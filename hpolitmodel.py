@@ -39,7 +39,7 @@ class LitModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, targets = batch
-        targets = targets.to(x.device)
+        targets = targets.view(-1).to(x.device)
         outputs = self(x)
         loss = self.lossfn(outputs, targets)  # check sizes should be b, 2, 42, 42 and b, 42, 42
         self.log("train_loss", loss, logger=True, on_epoch=True, on_step=False, sync_dist=True)
