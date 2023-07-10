@@ -100,7 +100,7 @@ class SiDBTransformer(nn.Module):
 
 
         x = self.to_probs(x.permute(0, 2, 3, 1).contiguous().view(-1, x.shape[-1])) #check size
-        print(x)
+        print("probs out", x)
 
         #X = self.norm(x)
 
@@ -108,7 +108,7 @@ class SiDBTransformer(nn.Module):
         #x = self.to_linprobs(x) #check #check size
 
         x = self.softmax(x) #check size
-        print(x)
+        print("after, softmax", x)
 
 
         return x #check size
