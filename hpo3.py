@@ -48,7 +48,7 @@ def objective(trial: optuna.trial.Trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters", sampler=optuna.samplers.GridSampler())
+    study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters", sampler=optuna.samplers.CmaEsSampler())
     study.optimize(objective, n_trials=200, timeout=7200, gc_after_trial=True)
     trials_df = study.trials_dataframe()
     trials_df.to_csv("/home/igardner/hpologsnew3/hpotrials.csv")
