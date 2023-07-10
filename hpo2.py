@@ -1,8 +1,8 @@
 import optuna
-from hpo.datasetload import train_loader, valid_loader
+from datasetload import train_loader, valid_loader
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger
-from hpo.hpolitmodel import LitModel
+from hpolitmodel import LitModel
 import torch.nn as nn
 
 
@@ -19,8 +19,8 @@ def define_model_config(trial):
     depth = trial.suggest_int("depth", 4, 36, step=2)
     weight_decay = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
     lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-    num_heads = trial.suggest_int('headbase', 4, 16, steps=4)  # Define a common base value
-    factor_emb = trial.suggest_int('factor_emb', 32, 64, steps=2)  # Multiplier for the base to define the embedding size
+    num_heads = trial.suggest_int('headbase', 4, 16, step=4)  # Define a common base value
+    factor_emb = trial.suggest_int('factor_emb', 32, 64, step=2)  # Multiplier for the base to define the embedding size
     embedding_dim = num_heads * factor_emb
 
 
@@ -40,7 +40,7 @@ def objective(trial: optuna.trial.Trial):
     logger = CSVLogger(version="trial"+str(trial.number), save_dir="/home/igardner/hpologsnew2", name="hpotrials")
     model_config = define_model_config(trial)
     model = LitModel(model_config)
-    trainer = pl.Trainer(max_epochs=10, logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
+    trainer = pl.Trainer(max_epochs=10,strategy='ddp_find_unused_parameters_true',  logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
                          check_val_every_n_epoch=10, limit_val_batches=20, limit_train_batches=100)
     trainer.logger.log_hyperparams(model_config)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=valid_loader)

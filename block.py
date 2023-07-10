@@ -1,5 +1,5 @@
 
-from hpo.attention import SparseAttention
+from attention import SparseAttention
 import torch
 import torch.nn as nn
 import MinkowskiEngine as me

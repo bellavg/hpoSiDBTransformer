@@ -8,10 +8,14 @@ class FocalLoss(nn.Module):
         self.alpha = alpha
         self.gamma = gamma
         self.reduce = reduce
-        self.criterion = nn.BCELoss( reduction='none', ignore_index=-1)
+        self.criterion = nn.BCELoss( reduction='none')
 
     def forward(self, outputs, targets):
-
+        targets = targets.reshape(-1)
+        mask = targets >= 0
+        outputs = outputs.permute(0, 2, 3, 1).reshape((-1, 2))
+        targets = targets[mask]
+        outputs = outputs[mask.unsqueeze(-1).repeat(1, 2)].view(-1, 2)
         BCE_loss = self.criterion(outputs, targets)
         pt = torch.exp(-BCE_loss) # prevents nans when probability 0
         F_loss = self.alpha * (1-pt)**self.gamma * BCE_loss

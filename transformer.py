@@ -1,7 +1,7 @@
-from hpo.hyperparameters import GRIDSIZE
-from hpo.block import Block
-from hpo.positionalinformation import *
-from hpo.customloss import *
+from hyperparameters import GRIDSIZE
+from block import Block
+from positionalinformation import *
+from customloss import *
 import torch
 import torch.nn as nn
 import MinkowskiEngine as ME

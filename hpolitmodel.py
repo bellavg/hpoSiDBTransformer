@@ -1,11 +1,11 @@
 import pytorch_lightning as pl
 import torch
-
+from focal_loss.focal_loss import FocalLoss
 from transformer import SiDBTransformer
 from hyperparameters import *
 import gc
 import torch.nn as nn
-from lossfunction import *
+
 
 
 def get_accuracy(outputs, targets):
@@ -32,15 +32,16 @@ class LitModel(pl.LightningModule):
         self.opname = "Adam"
         self.lr = config["lr"]
         self.wd = config["weight_decay"]
-        self.lossfn = FocalLoss()
+        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1, weights=torch.tensor([2.0, 1.0]).cuda())
 
     def forward(self, x):
         return self.transformer(x)
 
     def training_step(self, batch, batch_idx):
         x, targets = batch
+        targets = targets.to(x.device)
         outputs = self(x)
-        loss = self.lossfn(outputs, targets)  # check sizes should be b, 2, 42, 42 and b, 42, 42
+        loss = self.lossfn(outputs.permute(0,2,3,1).reshape(-1,2).cuda(), targets.reshape(-1).cuda())  # check sizes should be b, 2, 42, 42 and b, 42, 42
         self.log("train_loss", loss, logger=True, on_epoch=True, on_step=False, sync_dist=True)
         return loss
 

@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import math
-from hpo.hyperparameters import MAXDBS
+from hyperparameters import MAXDBS
 
 
 class BaseAbsPE(nn.Module):
@@ -15,14 +15,14 @@ class BaseAbsPE(nn.Module):
     def forward(self, b):
         grid_size = self.grid_size
         e_dim = self.ed
-        y_embedded_coords = self.embed(torch.arange(grid_size))
+        y_embedded_coords = self.embed(torch.arange(grid_size).cuda()).cuda()
         y_embedded_coords = y_embedded_coords.repeat(grid_size, 1, 1)
-        x_embedded_coords = y_embedded_coords.transpose(0, 1)
+        x_embedded_coords = y_embedded_coords.transpose(0, 1).cuda()
         embedded_coords = x_embedded_coords + y_embedded_coords
         embedded_coords = torch.nn.functional.normalize(embedded_coords, dim=-1)
         embedded_coords = embedded_coords.reshape(grid_size, grid_size, e_dim)
 
-        return embedded_coords.repeat(b, 1, 1, 1)
+        return embedded_coords.repeat(b, 1, 1, 1).cuda()
 
 
 
