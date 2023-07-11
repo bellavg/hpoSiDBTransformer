@@ -6,7 +6,6 @@ from hpolitmodel import LitModel
 import torch.nn as nn
 import torch
 
-torch.autograd.set_detect_anomaly(True)
 
 # TODO: hyperparameter alert depth of Transformer Blocks
 # TODO: hyperparameter alert embedding dimensions
@@ -42,7 +41,7 @@ def objective(trial: optuna.trial.Trial):
     logger = CSVLogger(version="trial"+str(trial.number), save_dir="/home/igardner/hpologsnew", name="hpotrials")
     model_config = define_model_config(trial)
     model = LitModel(model_config)
-    trainer = pl.Trainer(fast_dev_run=True,max_epochs=10, logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
+    trainer = pl.Trainer(max_epochs=10, logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
                          check_val_every_n_epoch=10, limit_val_batches=10, limit_train_batches=50, strategy='ddp_find_unused_parameters_true')
     trainer.logger.log_hyperparams(model_config)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=valid_loader)
@@ -51,7 +50,7 @@ def objective(trial: optuna.trial.Trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters")
-    study.optimize(objective, n_trials=200, timeout=7200, gc_after_trial=True)
+    study.optimize(objective, n_trials=200, timeout=3600, gc_after_trial=True)
     trials_df = study.trials_dataframe()
     trials_df.to_csv("/home/igardner/hpologsnew/hpotrials.csv")
     print(study.best_trial)
