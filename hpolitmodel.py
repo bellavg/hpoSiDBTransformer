@@ -26,7 +26,7 @@ class LitModel(pl.LightningModule):
         self.opname = "Adam"
         self.lr = LEARNINGRATE
         self.wd = WEIGHTDECAY
-        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1, weights=torch.tensor([2.0, 3.0]).to(self.device))
+        self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1)
 
     def training_step(self, batch, batch_idx):
         x, targets = batch
