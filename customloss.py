@@ -16,14 +16,14 @@ def get_potential(x, b, gridsize):
         batchnz = torch.nonzero(batch)
         for i, currenti in enumerate(batchnz):
             for j, comp_cord in enumerate(batchnz[i:]):
-                loc = comp_cord[0] * 42 + comp_cord[1]
+                loc = comp_cord[0] * gridsize + comp_cord[1]
                 epbs_out[batch_index][currenti[0]][currenti[1]][j] = epbs_matrix[currenti[0]][currenti[1]][loc]
-                loc2 = currenti[0] * 42 + currenti[1]
+                loc2 = currenti[0] * gridsize + currenti[1]
                 epbs_out[batch_index][comp_cord[0]][comp_cord[1]][i] = epbs_matrix[comp_cord[0]][comp_cord[1]][loc2]
 
     epbs_out = torch.sum(epbs_out, dim=-1)
-    epbs_out = torch.nn.functional.normalize(epbs_out, p=2.0, dim=-1)
     return epbs_out
+
 
 
 #ELECTRIC_CHARGE = - 1.602 * 1E-19

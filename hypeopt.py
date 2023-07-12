@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger
 from hpolitmodel import LitModel
 import torch.nn as nn
+import torch
 
 
 # TODO: hyperparameter alert depth of Transformer Blocks
@@ -41,7 +42,7 @@ def objective(trial: optuna.trial.Trial):
     model_config = define_model_config(trial)
     model = LitModel(model_config)
     trainer = pl.Trainer(max_epochs=10, logger=logger,  enable_checkpointing=False, enable_progress_bar=False,
-                         check_val_every_n_epoch=10, limit_val_batches=10, limit_train_batches=50, strategy='ddp_find_unused_parameters_true')
+                         check_val_every_n_epoch=10, limit_val_batches=30, limit_train_batches=200, strategy='ddp_find_unused_parameters_true')
     trainer.logger.log_hyperparams(model_config)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=valid_loader)
     return trainer.callback_metrics["val_acc"].item()
@@ -49,7 +50,7 @@ def objective(trial: optuna.trial.Trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize", study_name="SiDBTransformer_Hyperparameters")
-    study.optimize(objective, n_trials=200, timeout=14400, gc_after_trial=True)
+    study.optimize(objective, n_trials=100, timeout=21600, gc_after_trial=True)
     trials_df = study.trials_dataframe()
     trials_df.to_csv("/home/igardner/hpologsnew/hpotrials.csv")
     print(study.best_trial)
