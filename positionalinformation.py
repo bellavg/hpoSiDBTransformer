@@ -24,7 +24,6 @@ class BaseAbsPE(nn.Module):
         return embedded_coords.repeat(b, 1, 1, 1).cuda()
 
 
-
 class AIAYNPE(nn.Module):
     def __init__(self, embedding_dim, grid_size):
         super(AIAYNPE, self).__init__()
@@ -119,6 +118,7 @@ class AbsolutePositionalEncoding(nn.Module):
         pos_enc[:, :, 0::2] = torch.sin(position * div_term)
         pos_enc[:, :, 1::2] = torch.cos(position * div_term)
         return pos_enc.unsqueeze(0)  # Adding extra dimension for batch size
-    def forward(self,b):
+
+    def forward(self, b):
         # Assuming x is of shape (batch_size, grid_size, grid_size, d_model)
         return self.embedding.repeat(b, 1, 1, 1)
