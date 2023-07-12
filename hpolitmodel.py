@@ -17,15 +17,15 @@ def get_accuracy(outputs, targets):
 
 
 class LitModel(pl.LightningModule):
-    def __init__(self,  position_info=None):
+    def __init__(self,  config):
         super().__init__()
-        self.transformer = SiDBTransformer( position_info, input_dim=INPUTCHANNELS,
-                                           depth=DEPTH, embeddim=EMBEDDIM,
-                                           heads=HEADS,
-                                           gridsize=GRIDSIZE, d_rate=DO)
+        self.transformer = SiDBTransformer( position_info=config["pi"], input_dim=INPUTCHANNELS,
+                                           depth=config["depth"], embeddim=config["embedding_dim"],
+                                           heads=config["head"],
+                                           gridsize=GRIDSIZE, d_rate=config["dropout"])
         self.opname = "Adam"
-        self.lr = LEARNINGRATE
-        self.wd = WEIGHTDECAY
+        self.lr = config["lr"]
+        self.wd = config["weight_decay"]
         self.lossfn = FocalLoss(gamma=2.0, ignore_index=-1)
 
     def training_step(self, batch, batch_idx):
